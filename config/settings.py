@@ -23,8 +23,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret")  # Render will provide real key
 DEBUG = os.getenv("DEBUG", "False") == "True"
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split(",")
-
+#ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split(",")
+render_host = os.getenv("RENDER_EXTERNAL_HOSTNAME")
+if render_host:
+    ALLOWED_HOSTS = [render_host]
+    # Django 4/5 require scheme for CSRF trusted origins
+    CSRF_TRUSTED_ORIGINS = [f"https://{render_host}"]
+else:
+    # Local/dev fallback
+    ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
