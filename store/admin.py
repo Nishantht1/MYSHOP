@@ -3,6 +3,10 @@ from django.db import transaction
 
 from .models import Category, Product, SKU, Order, OrderItem, OrderStatus
 
+admin.site.site_header = "Vape Time Administration"
+admin.site.site_title = "Vape Time Admin Portal"
+admin.site.index_title = "Welcome to Vape Time Admin"
+
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
