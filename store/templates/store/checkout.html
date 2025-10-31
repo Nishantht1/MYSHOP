@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Checkout — MyShop</title>
+  <style>
+    body {font-family:system-ui;max-width:900px;margin:2rem auto;padding:0 1rem;}
+    form {display:grid;gap:12px;grid-template-columns:1fr;}
+    input, textarea {padding:8px;border:1px solid #e5e7eb;border-radius:8px;}
+    button {padding:10px 14px;border:1px solid #111827;background:#111827;color:#fff;border-radius:8px;cursor:pointer}
+    table {width:100%;border-collapse:collapse;margin:1rem 0}
+    th,td {padding:8px;border-bottom:1px solid #e5e7eb;text-align:left}
+    .right{text-align:right}
+  </style>
+</head>
+<body>
+  <p><a href="/cart/">← Back to cart</a></p>
+  <h1>Checkout</h1>
+
+  <h3>Order summary</h3>
+  <table>
+    <thead><tr><th>Product</th><th>SKU</th><th class="right">Qty</th><th class="right">Price</th><th class="right">Total</th></tr></thead>
+    <tbody>
+      {% for it in cart.items %}
+        <tr>
+          <td>{{ it.product.name }}</td>
+          <td>{{ it.sku.code }}</td>
+          <td class="right">{{ it.qty }}</td>
+          <td class="right">${{ it.price|floatformat:2 }}</td>
+          <td class="right">${{ it.line_total|floatformat:2 }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr><th colspan="4" class="right">Order total</th><th class="right">${{ cart.total|floatformat:2 }}</th></tr>
+    </tfoot>
+  </table>
+
+  {% if messages %}
+    <ul>{% for m in messages %}<li>{{ m }}</li>{% endfor %}</ul>
+  {% endif %}
+
+  <h3>Shipping details</h3>
+  <form method="post">
+    {% csrf_token %}
+    <input name="name" placeholder="Full name" required>
+    <input name="email" placeholder="Email" type="email" required>
+    <input name="address" placeholder="Address line" required>
+    <div style="display:grid;gap:12px;grid-template-columns:2fr 1fr 1fr;">
+      <input name="city" placeholder="City">
+      <input name="state" placeholder="State">
+      <input name="postal" placeholder="Postal code">
+    </div>
+    <button type="submit">Place order</button>
+  </form>
+</body>
+</html>

@@ -1,0 +1,9 @@
+<!doctype html>
+<html><body style="font-family:system-ui;max-width:900px;margin:2rem auto;padding:0 1rem">
+  <h1>Thank you!</h1>
+  <p>Your order was created successfully.</p>
+  <p><strong>Order #{{ order.id }}</strong></p>
+  <p>Status: {{ order.get_status_display }}</p>
+  <p>Total: ${{ order.total_cents|floatformat:-2|divisibleby:100 }}</p>
+  <p><a href="/">Return to catalog →</a></p>
+</body></html>

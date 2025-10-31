@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ p.name }} — MyShop</title>
+    <style>
+      body {font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+            max-width: 900px; margin: 2rem auto; padding: 0 1rem;}
+      .muted {color: #6b7280;}
+      .wrap {display: grid; grid-template-columns: 1fr; gap: 24px;}
+      @media (min-width: 720px) { .wrap {grid-template-columns: 1fr 1fr;} }
+      .card {border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px;}
+      img {width: 100%; height: 360px; object-fit: cover; border-radius: 12px;}
+      .price {font-size: 1.25rem; font-weight: 700;}
+      a {text-decoration: none;}
+
+      /* add-to-cart styles */
+      .add-to-cart { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-top:12px; }
+      .add-to-cart label { font-weight:600; }
+      .add-to-cart select,
+      .add-to-cart input[type="number"] {
+        padding:6px 8px; border:1px solid #e5e7eb; border-radius:8px; min-width:180px;
+      }
+      .add-to-cart button {
+        padding:8px 12px; border:1px solid #111827; background:#111827; color:#fff;
+        border-radius:8px; cursor:pointer;
+      }
+      .add-to-cart button:hover { opacity:.9; }
+      .hint { color:#6b7280; font-size:.9rem; }
+    </style>
+  </head>
+  <body>
+    <p><a href="/">← Back to catalog</a></p>
+
+    <div class="wrap">
+      <div>
+        {% if p.image %}
+          <img src="{{ p.image.url }}" alt="{{ p.name }}">
+        {% endif %}
+      </div>
+      <div class="card">
+        <div class="muted">{{ p.category.name }}</div>
+        <h1>{{ p.name }}</h1>
+        <p>{{ p.description|default:"(No description yet)" }}</p>
+        <div class="price">${{ p.price|floatformat:2 }}</div>
+
+        <p class="muted">
+          {% if p.total_stock_available > 0 %}
+            In stock: {{ p.total_stock_available }}
+          {% else %}
+            Out of stock
+          {% endif %}
+        </p>
+
+        <h3>SKUs</h3>
+        <ul>
+          {% for s in p.skus.all %}
+            <li><strong>{{ s.code }}</strong> — available: {{ s.stock_available }}</li>
+          {% empty %}
+            <li>No SKUs created yet.</li>
+          {% endfor %}
+        </ul>
+
+        <!-- SINGLE add-to-cart + SINGLE View cart link -->
+        <h3>Add to cart</h3>
+        <form method="post" action="" onsubmit="return goToSkuAdd(event)">
+          {% csrf_token %}
+          <div class="add-to-cart">
+            <label for="skuSel">SKU</label>
+            <select id="skuSel" aria-label="Choose SKU">
+              {% for s in p.skus.all %}
+                <option value="{{ s.id }}" data-avail="{{ s.stock_available }}">
+                  {{ s.code }} (avail: {{ s.stock_available }})
+                </option>
+              {% endfor %}
+            </select>
+
+            <label for="qty">Qty</label>
+            <input id="qty" name="qty" type="number" min="1" value="1" style="width:90px">
+
+            <button type="submit">Add to cart</button>
+          </div>
+          <div class="hint">Tip: quantity can’t exceed the available stock for the selected SKU.</div>
+        </form>
+
+        <p style="margin-top:12px;"><a href="/cart/">View cart →</a></p>
+      </div>
+    </div>
+
+    <script>
+      const skuSel = document.getElementById('skuSel');
+      const qtyInp = document.getElementById('qty');
+
+      function setQtyMax() {
+        const avail = parseInt(skuSel.selectedOptions[0].dataset.avail || '0', 10);
+        qtyInp.max = Math.max(1, avail);
+        if (parseInt(qtyInp.value || '1', 10) > avail) qtyInp.value = avail || 1;
+      }
+      skuSel.addEventListener('change', setQtyMax);
+      setQtyMax();
+
+      function goToSkuAdd(e){
+        e.preventDefault();
+        const url = `/cart/add/${skuSel.value}/`;
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = url;
+        const csrf = document.querySelector('input[name=csrfmiddlewaretoken]').cloneNode();
+        form.appendChild(csrf);
+        const q = document.createElement('input'); q.name='qty'; q.value=qtyInp.value || 1; q.type='hidden';
+        form.appendChild(q);
+        document.body.appendChild(form);
+        form.submit();
+        return false;
+      }
+    </script>
+  </body>
+</html>

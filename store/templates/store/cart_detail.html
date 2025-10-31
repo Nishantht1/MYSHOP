@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Your Cart — MyShop</title>
+    <style>
+      body {font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+            max-width: 900px; margin: 2rem auto; padding: 0 1rem;}
+      table {width: 100%; border-collapse: collapse;}
+      th, td {padding: 8px; border-bottom: 1px solid #e5e7eb; text-align: left;}
+      .right {text-align: right;}
+      a {text-decoration: none;}
+      .muted {color: #6b7280;}
+    </style>
+  </head>
+  <body>
+    <p><a href="/">← Continue shopping</a></p>
+    <h1>Your Cart</h1>
+
+    {% if messages %}
+      <ul>
+        {% for m in messages %}
+          <li>{{ m }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    <table>
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>SKU</th>
+          <th class="right">Qty</th>
+          <th class="right">Price</th>
+          <th class="right">Line total</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for it in cart.items %}
+          <tr>
+            <td><a href="{% url 'product_detail' slug=it.product.slug %}">{{ it.product.name }}</a></td>
+            <td>{{ it.sku.code }} <span class="muted">(avail: {{ it.available }})</span></td>
+            <td class="right">{{ it.qty }}</td>
+            <td class="right">${{ it.price|floatformat:2 }}</td>
+            <td class="right">${{ it.line_total|floatformat:2 }}</td>
+            <td><a href="{% url 'cart_remove' it.sku.id %}">remove</a></td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6">Your cart is empty.</td></tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <th colspan="4" class="right">Total</th>
+          <th class="right">
+            ${{ cart.total|floatformat:2 }}
+          </th>
+          <th></th>
+        </tr>
+      </tfoot>
+    </table>
+    <p><a href="/checkout/">Proceed to checkout →</a></p>
+    <!-- Checkout flow to be added later (addresses, orders, payments). -->
+  </body>
+</html>
